@@ -15,12 +15,12 @@ public class GridManager : MonoBehaviour
 
 
 
-    public Node[,] grid;
+    public static Node[,] grid;
 
-    public LayerMask obstructionLayer;
+    [SerializeField] private LayerMask obstructionLayer;
 
-    public Vector3 gridSize;
-    public Vector3 gridPosition;
+    [SerializeField] private Vector3 gridSize;
+    [SerializeField] private Vector3 gridPosition;
 
     [Range(0.1f, 5)]
     public float nodeSize;
@@ -30,20 +30,15 @@ public class GridManager : MonoBehaviour
     public int MaxSize => gridSizeX * gridSizeZ;
 
 
-    public StalkerAI stalkerAI;
+    [SerializeField] private bool drawNodeColorGizmos = false;
+
+    [SerializeField] private Color[] nodeLayerColors;
 
 
-    public bool drawPathGizmos = true;
-    public bool drawNodeColorGizmos = false;
-
-    public Color pathNodesColor = Color.black;
-    public Color[] nodeLayerColors;
 
 
     public void Init()
     {
-        stalkerAI = StalkerAI.Instance;
-
         CreateGrid();
     }
 
@@ -115,6 +110,39 @@ public class GridManager : MonoBehaviour
         return grid[x, z];
     }
 
+    public static Node NodeFromGridId(int2 gridId)
+    {
+        return grid[gridId.x, gridId.y];
+    }
+    public static Node NodeFromGridId(int x, int y)
+    {
+        return grid[x, y];
+    }
+
+
+    public static void SetNodeVisibilityState(int2 gridId, bool newState)
+    {
+        bool currentState = grid[gridId.x, gridId.y].visibleByPlayer;
+
+        if (currentState != newState)
+        {
+            StalkerAI.Instance.UpdatePath();
+
+            grid[gridId.x, gridId.y].visibleByPlayer = newState;
+        }
+    }
+    public static void SetNodeVisibilityState(int x, int y, bool newState)
+    {
+        bool currentState = grid[x, y].visibleByPlayer;
+
+        if (currentState != newState)
+        {
+            StalkerAI.Instance.UpdatePath();
+
+            grid[x, y].visibleByPlayer = newState;
+        }
+    }
+
 
 
     private void OnDrawGizmos()
@@ -134,23 +162,14 @@ public class GridManager : MonoBehaviour
                         //    Gizmos.color = nodeLayerColors[grid[i2, i3].layerId / 10];
                         //}
 
-                        Gizmos.color = Color.red;
+                        Gizmos.color = nodeLayerColors[1];
                         if (grid[i2, i3].visibleByPlayer)
                         {
-                            Gizmos.color = Color.green;
+                            Gizmos.color = nodeLayerColors[0];
                         }
 
                         Gizmos.DrawCube(grid[i2, i3].worldPos, Vector3.one * nodeSize * 0.9f);
                     }
-                }
-            }
-
-            if (drawPathGizmos == true && stalkerAI.path != null)
-            {
-                Gizmos.color = pathNodesColor;
-                for (int i2 = 0; i2 < stalkerAI.path.Count; i2++)
-                {
-                    Gizmos.DrawCube(stalkerAI.path[i2], Vector3.one * nodeSize * 0.9f);
                 }
             }
         }

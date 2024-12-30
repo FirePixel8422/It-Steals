@@ -17,9 +17,12 @@ public class PathFinding : MonoBehaviour
         gridManager = GridManager.Instance;
 
         gridManager.Init();
+        ViewUpdater.Init();
+
+        StalkerAI.Instance.Init();
     }
 
-    public static bool TryGetPathToTarget(Vector3 startPos, Vector3 targetPos, out List<Vector3> path)
+    public static bool TryGetPathToTarget(Vector3 startPos, Vector3 targetPos, int visibleTileCost, List<Vector3> path, bool hideIfPlayerIsTooAware = true)
     {
         Node startNode = gridManager.NodeFromWorldPoint(startPos);
         Node targetNode = gridManager.NodeFromWorldPoint(targetPos);
@@ -36,10 +39,9 @@ public class PathFinding : MonoBehaviour
 
             if (currentNode == targetNode)
             {
+                bool pathSucces = RetracePath(startNode, targetNode, path, hideIfPlayerIsTooAware);
 
-                path = RetracePath(startNode, targetNode);
-
-                return true;
+                return pathSucces;
             }
 
 
@@ -54,6 +56,11 @@ public class PathFinding : MonoBehaviour
 
                 int neigbourDist = GetDistance(currentNodeGridPos, neigbour.gridPos);
                 int newMovementCostToNeigbour = currentNode.gCost + neigbourDist;
+
+                if (neigbour.visibleByPlayer)
+                {
+                    newMovementCostToNeigbour += visibleTileCost;
+                }
 
                 if (newMovementCostToNeigbour < neigbour.gCost || !openNodes.Contains(neigbour))
                 {
@@ -75,23 +82,29 @@ public class PathFinding : MonoBehaviour
         return false;
     }
 
-    private static List<Vector3> RetracePath(Node startNode, Node endNode)
+    private static bool RetracePath(Node startNode, Node endNode, List<Vector3> path, bool hideIfPlayerIsTooAware)
     {
-        List<Vector3> pathNodePositions = new List<Vector3>();
+        path.Clear();
 
         Node currentNode = endNode;
 
         while (currentNode != startNode)
         {
-            pathNodePositions.Add(currentNode.worldPos);
+            path.Add(currentNode.worldPos);
 
-            currentNode = gridManager.grid[currentNode.parentGridPos.x, currentNode.parentGridPos.y];
+            currentNode = GridManager.NodeFromGridId(currentNode.parentGridPos);
+
+            if (hideIfPlayerIsTooAware && currentNode.visibleByPlayer)
+            {
+                path.Clear();
+                return false;
+            }
         }
 
         //reverse when done
-        pathNodePositions.Reverse();
+        path.Reverse();
 
-        return pathNodePositions;
+        return true;
     }
 
 

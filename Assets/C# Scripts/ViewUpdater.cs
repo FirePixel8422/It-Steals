@@ -10,22 +10,27 @@ public class ViewUpdater : MonoBehaviour
     public Camera playerCamera;
     public LayerMask wallLayer;
 
-    public int gridWidth = 100;
-    public int gridHeight = 100;
+    [SerializeField] private static int gridWidth = 100;
+    [SerializeField] private static int gridHeight = 100;
 
-    private float3 gridOffset;
+    private static float3 gridOffset;
 
 
-    private void Start()
+    [SerializeField] private bool showRays;
+    [SerializeField] private bool showObstructedRays;
+
+
+
+    public static void Init()
     {
+        gridWidth = GridManager.Instance.gridSizeX;
+        gridHeight = GridManager.Instance.gridSizeZ;
+
         gridOffset = new float3(gridWidth / 2 - 0.5f, 0, gridHeight / 2 - 0.5f);
     }
 
     private void Update()
     {
-        sw = Stopwatch.StartNew();
-
-
         CheckVisibleTiles();
 
         //print(sw.ElapsedTicks);
@@ -44,7 +49,7 @@ public class ViewUpdater : MonoBehaviour
                 // Determine the position of the tile's center in world space
                 float3 tilePosition = new float3(x, 0, y) - gridOffset; // Assuming flat grid on the XZ plane
 
-                GridManager.Instance.grid[x, y].visibleByPlayer = IsTileVisible(tilePosition, planes); 
+                GridManager.NodeFromGridId(x, y).visibleByPlayer = IsTileVisible(tilePosition, planes); 
             }
         }
     }
@@ -55,7 +60,7 @@ public class ViewUpdater : MonoBehaviour
         // Check if the tile is within the frustum
         // You can use the plane-based AABB check to see if the tile's bounding box intersects the frustum
         // A tile is a square with size tileSize, so we check its bounds
-        Bounds tileBounds = new Bounds(tilePosition, new float3(1, 1, 1)) ; // Create a bounding box for the tile
+        Bounds tileBounds = new Bounds(tilePosition, new float3(1, 3, 1)) ; // Create a bounding box for the tile
 
         bool inCameraView = GeometryUtility.TestPlanesAABB(planes, tileBounds);
 
@@ -67,21 +72,41 @@ public class ViewUpdater : MonoBehaviour
         // Now check for obstacles between the camera and the tile
         float3 startPosition = playerCamera.transform.position;  // Start ray from the camera position
 
-        UnityEngine.Debug.DrawRay(startPosition, tilePosition - startPosition);
 
-        if (Physics.Raycast(startPosition, tilePosition - startPosition, out RaycastHit hit, 2.25f, wallLayer))
+        if (Physics.Raycast(startPosition, tilePosition - startPosition, out RaycastHit hit, 1000f, wallLayer))
         {
+            if (showObstructedRays)
+            {
+                UnityEngine.Debug.DrawLine(startPosition, hit.point, Color.red);
+            }
+
             // If we hit something before reaching the tile, it's obstructed
             if (hit.point != (Vector3)tilePosition)
             {
-                return true;
+                return false;
+            }
+        }
+        else
+        {
+            if (showRays)
+            {
+                UnityEngine.Debug.DrawRay(startPosition, tilePosition - startPosition, Color.green);
             }
         }
 
-        return false;
+        return true;
     }
 
 
 
-    private Stopwatch sw;
+
+
+
+    private void OnValidate()
+    {
+        if (showRays == false)
+        {
+            showObstructedRays = false;
+        }
+    }
 }
