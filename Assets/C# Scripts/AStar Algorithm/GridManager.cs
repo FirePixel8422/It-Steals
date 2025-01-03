@@ -1,7 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
-using UnityEditor;
 using UnityEngine;
 
 public class GridManager : MonoBehaviour
@@ -29,10 +27,6 @@ public class GridManager : MonoBehaviour
     public int gridSizeX, gridSizeZ;
     public int MaxSize => gridSizeX * gridSizeZ;
 
-
-    [SerializeField] private bool drawNodeColorGizmos = false;
-
-    [SerializeField] private Color[] nodeLayerColors;
 
 
 
@@ -126,7 +120,7 @@ public class GridManager : MonoBehaviour
 
         if (currentState != newState)
         {
-            StalkerAI.Instance.UpdatePath();
+            StalkerManager.QueueStalkerPathUpdates();
 
             grid[gridId.x, gridId.y].visibleByPlayer = newState;
         }
@@ -137,13 +131,21 @@ public class GridManager : MonoBehaviour
 
         if (currentState != newState)
         {
-            StalkerAI.Instance.UpdatePath();
+            StalkerManager.QueueStalkerPathUpdates();
 
             grid[x, y].visibleByPlayer = newState;
         }
     }
 
 
+
+
+
+#if UNITY_EDITOR
+
+    [SerializeField] private bool drawNodeColorGizmos = false;
+
+    [SerializeField] private Color[] nodeLayerColors;
 
     private void OnDrawGizmos()
     {
@@ -177,4 +179,6 @@ public class GridManager : MonoBehaviour
         Gizmos.color = Color.white;
         Gizmos.DrawWireCube(gridPosition, new Vector3(gridSize.x, 0.5f, gridSize.z));
     }
+
+#endif
 }

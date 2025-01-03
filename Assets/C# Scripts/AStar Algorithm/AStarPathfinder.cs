@@ -1,28 +1,21 @@
 using System.Collections.Generic;
-using System.Diagnostics;
-using Unity.Burst;
 using Unity.Mathematics;
-using Unity.VisualScripting;
 using UnityEngine;
 
 
 
-public class PathFinding : MonoBehaviour
+public static class AStarPathfinder
 {
     private static GridManager gridManager;
 
 
-    private void Start()
+    public static void Init(GridManager _gridManager)
     {
-        gridManager = GridManager.Instance;
-
-        gridManager.Init();
-        ViewUpdater.Init();
-
-        StalkerAI.Instance.Init();
+        gridManager = _gridManager;
     }
 
-    public static bool TryGetPathToTarget(Vector3 startPos, Vector3 targetPos, int visibleTileCost, List<Vector3> path, bool hideIfPlayerIsTooAware = true)
+
+    public static bool TryGetPathToTarget(Vector3 startPos, Vector3 targetPos, int visibleTileCost, List<Vector3> path, bool forceAvoidVisibleTiles)
     {
         Node startNode = gridManager.NodeFromWorldPoint(startPos);
         Node targetNode = gridManager.NodeFromWorldPoint(targetPos);
@@ -39,7 +32,7 @@ public class PathFinding : MonoBehaviour
 
             if (currentNode == targetNode)
             {
-                bool pathSucces = RetracePath(startNode, targetNode, path, hideIfPlayerIsTooAware);
+                bool pathSucces = RetracePath(startNode, targetNode, path, forceAvoidVisibleTiles);
 
                 return pathSucces;
             }
@@ -62,6 +55,7 @@ public class PathFinding : MonoBehaviour
                     newMovementCostToNeigbour += visibleTileCost;
                 }
 
+
                 if (newMovementCostToNeigbour < neigbour.gCost || !openNodes.Contains(neigbour))
                 {
                     neigbour.gCost = newMovementCostToNeigbour;
@@ -77,28 +71,36 @@ public class PathFinding : MonoBehaviour
             }
         }
 
-        path = null;
-
         return false;
     }
 
-    private static bool RetracePath(Node startNode, Node endNode, List<Vector3> path, bool hideIfPlayerIsTooAware)
+    private static bool RetracePath(Node startNode, Node endNode, List<Vector3> path, bool forceAvoidVisibleTiles)
     {
         path.Clear();
+
+        if (endNode == startNode)
+        {
+            Debug.LogWarning("Target Already Reached");
+            return false;
+        }
 
         Node currentNode = endNode;
 
         while (currentNode != startNode)
         {
-            path.Add(currentNode.worldPos);
 
-            currentNode = GridManager.NodeFromGridId(currentNode.parentGridPos);
-
-            if (hideIfPlayerIsTooAware && currentNode.visibleByPlayer)
+            if (currentNode != endNode && forceAvoidVisibleTiles && currentNode.visibleByPlayer)
             {
+                Debug.LogWarning("Scary Mode = " + forceAvoidVisibleTiles + " Failed");
+
                 path.Clear();
                 return false;
             }
+
+
+            path.Add(currentNode.worldPos);
+
+            currentNode = GridManager.NodeFromGridId(currentNode.parentGridPos);
         }
 
         //reverse when done
