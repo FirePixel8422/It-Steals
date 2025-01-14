@@ -101,9 +101,17 @@ public class Stalker : MonoBehaviour
 
         hasActivePath = AStarPathfinder.TryGetPathToTarget(transform.position, destinationPos, _visibleTilesExtraMoveCost, path, scaredOfPlayer);
 
-        print(hasActivePath);
-
         return hasActivePath;
+    }
+
+
+
+    public void GetSpottedByPlayer()
+    {
+        if (behaviourState == StalkerState.Stalking || behaviourState == StalkerState.Hunting)
+        {
+            behaviourState = StalkerState.Hiding;
+        }
     }
 
 

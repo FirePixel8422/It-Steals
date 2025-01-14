@@ -472,7 +472,7 @@ MonoBehaviour:
   updateDelay: 0.01
   minForcedUpdateDelay: 0.5
   minTargetMovementForUpdate: 2
-  visibleTilesExtraMoveCost: 0
+  visibleTilesExtraMoveCost: 1000
   baseMoveSpeed: 0
   cMoveSpeed: 2
   ravagingMoveSpeed: 0
@@ -2251,7 +2251,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &581856160
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2267,7 +2267,7 @@ MonoBehaviour:
   updateDelay: 0.01
   minForcedUpdateDelay: 0.5
   minTargetMovementForUpdate: 2
-  visibleTilesExtraMoveCost: 0
+  visibleTilesExtraMoveCost: 1000
   baseMoveSpeed: 0
   cMoveSpeed: 2
   ravagingMoveSpeed: 0
@@ -3314,7 +3314,6 @@ GameObject:
   - component: {fileID: 963194228}
   - component: {fileID: 963194227}
   - component: {fileID: 963194226}
-  - component: {fileID: 963194229}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -3396,24 +3395,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1751750698}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &963194229
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 963194225}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c03dfc5d190bc1841b4064b2aafc927a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  playerCamera: {fileID: 963194227}
-  wallLayer:
-    serializedVersion: 2
-    m_Bits: 64
-  showRays: 1
-  showObstructedRays: 1
 --- !u!1 &999224228
 GameObject:
   m_ObjectHideFlags: 0
@@ -4270,7 +4251,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1411089601
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4286,7 +4267,7 @@ MonoBehaviour:
   updateDelay: 0.01
   minForcedUpdateDelay: 0.5
   minTargetMovementForUpdate: 2
-  visibleTilesExtraMoveCost: 0
+  visibleTilesExtraMoveCost: 1000
   baseMoveSpeed: 0
   cMoveSpeed: 2
   ravagingMoveSpeed: 0
@@ -4407,7 +4388,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1607603613
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4423,7 +4404,7 @@ MonoBehaviour:
   updateDelay: 0.01
   minForcedUpdateDelay: 0.5
   minTargetMovementForUpdate: 2
-  visibleTilesExtraMoveCost: 0
+  visibleTilesExtraMoveCost: 1000
   baseMoveSpeed: 0
   cMoveSpeed: 2
   ravagingMoveSpeed: 0
@@ -4954,6 +4935,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1751750698}
+  - component: {fileID: 1751750699}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -4977,6 +4959,24 @@ Transform:
   - {fileID: 963194228}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 65.323, z: 0}
+--- !u!114 &1751750699
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1751750697}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c03dfc5d190bc1841b4064b2aafc927a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerCamera: {fileID: 963194227}
+  wallLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  showRays: 1
+  showObstructedRays: 0
 --- !u!1 &1755133761
 GameObject:
   m_ObjectHideFlags: 0

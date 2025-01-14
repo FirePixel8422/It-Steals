@@ -43,7 +43,7 @@ public class ViewUpdater : MonoBehaviour, ICustomUpdater
         UpdateVisibleTiles(planes);
 
         //mark spotted stalkers as seen
-        //UpdateVisibleStalkers(planes);
+        UpdateVisibleStalkers(planes);
     }
 
 
@@ -74,6 +74,12 @@ public class ViewUpdater : MonoBehaviour, ICustomUpdater
             if (stalkerIsSpotted)
             {
                 stalkers[i].behaviourState = StalkerState.Hiding;
+
+                stalkers[i].GetComponent<Renderer>().material.color = Color.blue;
+            }
+            else
+            {
+                stalkers[i].GetComponent<Renderer>().material.color = Color.white;
             }
         }
     }
