@@ -2,7 +2,7 @@ using Unity.Mathematics;
 using UnityEngine;
 
 
-public class ViewUpdater : MonoBehaviour, ICustomUpdater
+public class ViewUpdater : UpdateMonoBehaviour
 {
     public Camera playerCamera;
     public LayerMask wallLayer;
@@ -29,12 +29,7 @@ public class ViewUpdater : MonoBehaviour, ICustomUpdater
     }
 
 
-
-
-
-    public bool requireUpdate => true;
-
-    public void OnUpdate(float deltaTime)
+    protected override void OnUpdate()
     {
         // Get the camera's frustum planes
         Plane[] planes = GeometryUtility.CalculateFrustumPlanes(playerCamera);
@@ -45,8 +40,6 @@ public class ViewUpdater : MonoBehaviour, ICustomUpdater
         //mark spotted stalkers as seen
         UpdateVisibleStalkers(planes);
     }
-
-
     private void UpdateVisibleTiles(Plane[] planes)
     {
         // Loop through the grid, checking which tiles are in the camera's view
@@ -61,8 +54,6 @@ public class ViewUpdater : MonoBehaviour, ICustomUpdater
             }
         }
     }
-
-
     private void UpdateVisibleStalkers(Plane[] planes)
     {
         Stalker[] stalkers = StalkerManager.stalkers;
@@ -83,9 +74,6 @@ public class ViewUpdater : MonoBehaviour, ICustomUpdater
             }
         }
     }
-
-
-
     private bool IsObjectVisible(float3 objectPosition, Plane[] planes)
     {
         // Check if the tile is within the frustum

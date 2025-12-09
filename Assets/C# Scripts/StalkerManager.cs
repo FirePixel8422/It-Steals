@@ -1,10 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.Burst;
+using FirePixel.Utility;
 using UnityEngine;
 
-[BurstCompile]
-public class StalkerManager : ICustomUpdater
+
+public class StalkerManager
 {
     public static Stalker[] stalkers;
 
@@ -20,27 +18,19 @@ public class StalkerManager : ICustomUpdater
         }
 
         // Add this instance to the static list when it's created
-        CustomUpdaterManager.AddUpdater(new StalkerManager());
+        UpdateScheduler.RegisterUpdate(OnUpdate);
     }
-
 
     public static void QueueStalkerPathUpdates()
     {
         pathUpdateQueued = true;
     }
 
-
-
-    //only call update if there are stalkers to update
-    public bool requireUpdate => stalkers.Length > 0;
-
-
-    [BurstCompile]
-    public void OnUpdate(float deltaTime)
+    private static void OnUpdate()
     {
         for (int i = 0; i < stalkers.Length; i++)
         {
-            stalkers[i].OnUpdate(deltaTime, pathUpdateQueued);
+            stalkers[i].OnUpdate(Time.deltaTime, pathUpdateQueued);
         }
     }
 }

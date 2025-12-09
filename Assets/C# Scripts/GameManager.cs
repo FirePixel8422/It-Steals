@@ -24,8 +24,6 @@ public class GameManager : MonoBehaviour
     {
         DontDestroyOnLoad(gameObject);
 
-        CustomUpdaterManager.Init(updateListPreSizeCap, autoFillUpdateList);
-
         GridManager _gridManager = GridManager.Instance;
         _gridManager.Init();
 
@@ -33,7 +31,7 @@ public class GameManager : MonoBehaviour
         AStarPathfinder.Init(_gridManager);
 
 
-        Stalker[] stalkers = FindObjectsOfType<Stalker>();
+        Stalker[] stalkers = this.FindObjectsOfType<Stalker>();
 
         StalkerManager.Init(stalkers);
     }
