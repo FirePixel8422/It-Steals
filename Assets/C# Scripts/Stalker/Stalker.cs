@@ -1,13 +1,11 @@
-using System.Collections;
 using System.Collections.Generic;
-using Unity.Burst;
-using Unity.VisualScripting;
 using UnityEngine;
 
 
-[BurstCompile]
 public class Stalker : MonoBehaviour
 {
+    [SerializeField] private StalkerAudio audioHandler;
+
     [SerializeField] private float updateDelay;
     [SerializeField] private float minForcedUpdateDelay;
     [SerializeField] private float minTargetMovementForUpdate;
@@ -27,21 +25,24 @@ public class Stalker : MonoBehaviour
     public StalkerState behaviourState;
 
 
-
     [SerializeField] private Transform target;
     [SerializeField] private Vector3 prevTargetPos;
 
     [SerializeField] private List<Vector3> path;
 
-
-
     [SerializeField] private bool drawPathGizmos = true;
     [SerializeField] private Color pathNodesColor = Color.black;
+
+    private Vector3 roamPoint;
+    private int roamPointsLeft;
 
 
 
     public void Init()
     {
+        audioHandler.Init(this);
+        audioHandler.StartChase();
+
         baseMoveSpeed = cMoveSpeed;
         prevTargetPos = target.position;
 
@@ -53,24 +54,50 @@ public class Stalker : MonoBehaviour
 
     public bool RecalculateNextPath()
     {
-        //the stalker is scared of the player while its not ravaging
+        // The stalker is scared of the player while its not ravaging
         bool scaredOfPlayer = false;
 
-        //extra cost for pathfinder per tile that the player can see
+        // Extra cost for pathfinder per tile that the player can see
         int _visibleTilesExtraMoveCost = 0;
 
-        //position to move to
+        // Position to move to
         Vector3 destinationPos = target.position;
 
 
         switch (behaviourState)
         {
-            case StalkerState.Hiding:
+            case StalkerState.RoamingStart:
 
-                scaredOfPlayer = true;
+                scaredOfPlayer = false;
                 _visibleTilesExtraMoveCost = visibleTilesExtraMoveCost;
 
-                destinationPos = target.position;
+                behaviourState = StalkerState.Roaming;
+                roamPointsLeft = 3;
+                roamPoint = GridManager.GetAnyWalkableNode().worldPos;
+
+                destinationPos = roamPoint;
+                break;
+
+            case StalkerState.Roaming:
+
+                // If stalker reached roampoint
+                if (transform.position == roamPoint)
+                {
+                    roamPointsLeft -= 1;
+                    if (roamPointsLeft == 0)
+                    {
+                        behaviourState = StalkerState.Stalking;
+                    }
+                    else
+                    {
+                        roamPoint = GridManager.GetAnyWalkableNode().worldPos;
+                    }
+                }
+
+                scaredOfPlayer = false;
+                _visibleTilesExtraMoveCost = visibleTilesExtraMoveCost;
+
+                destinationPos = roamPoint;
                 break;
 
             case StalkerState.Stalking:
@@ -83,7 +110,7 @@ public class Stalker : MonoBehaviour
 
             case StalkerState.Hunting:
 
-                scaredOfPlayer = false;
+                scaredOfPlayer = true;
                 _visibleTilesExtraMoveCost = visibleTilesExtraMoveCost;
 
                 destinationPos = target.position;
@@ -108,9 +135,9 @@ public class Stalker : MonoBehaviour
 
     public void GetSpottedByPlayer()
     {
-        if (behaviourState == StalkerState.Stalking || behaviourState == StalkerState.Hunting)
+        if (behaviourState != StalkerState.Ravaging)
         {
-            behaviourState = StalkerState.Hiding;
+            behaviourState = StalkerState.RoamingStart;
         }
     }
 
@@ -119,9 +146,10 @@ public class Stalker : MonoBehaviour
 
     public float elapsedTimeSinceLastUpdate;
 
-    [BurstCompile]
     public void OnUpdate(float deltaTime, bool pathUpdateQueued)
     {
+        audioHandler.OnUpdate();
+
         elapsedTimeSinceLastUpdate += deltaTime;
 
         bool targetMovedEnough = Vector3.Distance(target.position, prevTargetPos) > minTargetMovementForUpdate;
@@ -161,9 +189,9 @@ public class Stalker : MonoBehaviour
         bool tileReached;
 
 
-        while (true)
+        while (movementLeft > 0)
         {
-            (movementLeft, tileReached) = MoveTowardsNode(movementLeft, pathUpdateQueued);
+            (tileReached, movementLeft) = MoveTowardsNode(movementLeft);
 
             if (tileReached)
             {
@@ -171,13 +199,11 @@ public class Stalker : MonoBehaviour
                 if (pathUpdateQueued)
                 {
                     RecalculateNextPath();
-
                     break;
                 }
 
                 //next path node
                 path.RemoveAt(0);
-
 
                 //if current path is completed, end the movement loop
                 if (path.Count == 0)
@@ -186,19 +212,9 @@ public class Stalker : MonoBehaviour
                     break;
                 }
             }
-
-            //if all movement of this frame is used, end the movement loop
-            if (movementLeft == 0)
-            {
-                break;
-            }
         }
     }
-
-
-
-    /// <returns>The distance left to move this frame + the reachedNodeState</returns>
-    private (float, bool) MoveTowardsNode(float maxDistanceThisFrame, bool pathUpdateQueued)
+    private (bool, float) MoveTowardsNode(float maxDistanceThisFrame)
     {
         Vector3 currentPosition = transform.position;
         Vector3 targetPosition = path[0];
@@ -220,7 +236,7 @@ public class Stalker : MonoBehaviour
             // Calculate the remainder of speed left
             float remainder = maxDistanceThisFrame - distanceToTarget;
 
-            return (remainder, true);
+            return (true, remainder);
         }
         else
         {
@@ -228,7 +244,7 @@ public class Stalker : MonoBehaviour
             transform.position = currentPosition + vectorToTarget.normalized * maxDistanceThisFrame;
 
             // No remainder since we couldn't reach the next node
-            return (0, false);
+            return (false, 0);
         }
     }
 

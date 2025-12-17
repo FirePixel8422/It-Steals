@@ -5,6 +5,8 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : UpdateMonoBehaviour
 {
+    [SerializeField] private PlayerAudio audioHandler;
+
     [SerializeField] private float moveSpeed = 5f;
 
     [SerializeField] private Transform groundCheck;
@@ -37,6 +39,9 @@ public class PlayerController : UpdateMonoBehaviour
 
     private void Awake()
     {
+        audioHandler.Init(this);
+        audioHandler.StartHeartBeat();
+
         rb = GetComponent<Rigidbody>();
 
         camRotX = camTransform.localEulerAngles.x;
@@ -48,6 +53,7 @@ public class PlayerController : UpdateMonoBehaviour
     {
         Move();
         CameraMove();
+        audioHandler.UpdateHeartBeat(math.saturate(Vector3.Distance(transform.position, StalkerManager.stalkers[0].transform.position) / 20));
     }
 
     /// <summary>

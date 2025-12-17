@@ -17,7 +17,6 @@ public class StalkerManager
             stalkers[i].Init();
         }
 
-        // Add this instance to the static list when it's created
         UpdateScheduler.RegisterUpdate(OnUpdate);
     }
 
@@ -32,5 +31,10 @@ public class StalkerManager
         {
             stalkers[i].OnUpdate(Time.deltaTime, pathUpdateQueued);
         }
+    }
+
+    public static void OnDestroy()
+    {
+        UpdateScheduler.UnRegisterUpdate(OnUpdate);
     }
 }

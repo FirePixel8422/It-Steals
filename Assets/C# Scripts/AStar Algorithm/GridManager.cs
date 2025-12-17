@@ -14,6 +14,7 @@ public class GridManager : MonoBehaviour
 
 
     public static Node[,] grid;
+    private static List<Node> walkableNodes = new List<Node>();
 
     [SerializeField] private LayerMask obstructionLayer;
 
@@ -42,6 +43,7 @@ public class GridManager : MonoBehaviour
         gridSizeZ = Mathf.RoundToInt(gridSize.z / nodeSize);
 
         grid = new Node[gridSizeX, gridSizeZ];
+        walkableNodes.Clear();
         Vector3 worldBottomLeft = gridPosition - Vector3.right * gridSize.x / 2 - Vector3.forward * gridSize.z / 2;
 
 
@@ -62,6 +64,7 @@ public class GridManager : MonoBehaviour
                 else
                 {
                     grid[x, z] = new Node(true, worldPoint, new int2(x, z), 0);
+                    walkableNodes.Add(grid[x, z]);
                 }
             }
         }
@@ -90,7 +93,11 @@ public class GridManager : MonoBehaviour
         }
         return neigbours;
     }
-
+    public static Node GetAnyWalkableNode()
+    {
+        int index = UnityEngine.Random.Range(0, walkableNodes.Count);
+        return walkableNodes[index];
+    }
 
     public Node NodeFromWorldPoint(Vector3 worldPosition)
     {

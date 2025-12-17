@@ -60,26 +60,16 @@ public class ViewUpdater : UpdateMonoBehaviour
 
         for (int i = 0; i < stalkers.Length; i++)
         {
-            bool stalkerIsSpotted = IsObjectVisible(stalkers[i].transform.position, planes);
-
-            if (stalkerIsSpotted)
+            if (IsObjectVisible(stalkers[i].transform.position, planes))
             {
-                stalkers[i].behaviourState = StalkerState.Hiding;
-
-                stalkers[i].GetComponent<Renderer>().material.color = Color.blue;
-            }
-            else
-            {
-                stalkers[i].GetComponent<Renderer>().material.color = Color.white;
+                stalkers[i].GetSpottedByPlayer();
             }
         }
     }
     private bool IsObjectVisible(float3 objectPosition, Plane[] planes)
     {
-        // Check if the tile is within the frustum
-        // You can use the plane-based AABB check to see if the tile's bounding box intersects the frustum
-        // A tile is a square with size tileSize, so we check its bounds
-        Bounds tileBounds = new Bounds(objectPosition, new float3(nodeSize, 3, nodeSize)) ; // Create a bounding box for the tile
+        // Check if the tile is within view
+        Bounds tileBounds = new Bounds(objectPosition, new float3(nodeSize * 0.5f, 1, nodeSize * 0.5f));
 
         bool inCameraView = GeometryUtility.TestPlanesAABB(planes, tileBounds);
 
@@ -89,7 +79,7 @@ public class ViewUpdater : UpdateMonoBehaviour
         }
 
         // Now check for obstacles between the camera and the tile
-        float3 startPosition = playerCamera.transform.position;  // Start ray from the camera position
+        float3 startPosition = playerCamera.transform.position;
 
 
         if (Physics.Raycast(startPosition, objectPosition - startPosition, out RaycastHit hit, 1000f, wallLayer))
@@ -108,7 +98,6 @@ public class ViewUpdater : UpdateMonoBehaviour
                 return false;
             }
         }
-
 #if UNITY_EDITOR
         else
         {

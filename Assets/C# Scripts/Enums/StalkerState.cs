@@ -5,7 +5,8 @@
 
 public enum StalkerState
 {
-    Hiding,
+    RoamingStart,
+    Roaming,
     Stalking,
     Hunting,
     Ravaging,
