@@ -41,6 +41,7 @@ public class PlayerController : UpdateMonoBehaviour
     {
         audioHandler.Init(this);
         audioHandler.StartHeartBeat();
+        audioHandler.StartDangerSFX();
 
         rb = GetComponent<Rigidbody>();
 
@@ -53,7 +54,11 @@ public class PlayerController : UpdateMonoBehaviour
     {
         Move();
         CameraMove();
-        audioHandler.UpdateHeartBeat(math.saturate(Vector3.Distance(transform.position, StalkerManager.stalkers[0].transform.position) / 20));
+
+        Stalker stalker = StalkerManager.stalkers[0];
+        float dangerPercentage01 = math.saturate(Vector3.Distance(transform.position, stalker.transform.position) / audioHandler.DangerMaxDist);
+        audioHandler.UpdateHeartBeat(dangerPercentage01);
+        audioHandler.UpdateDangerSFX(dangerPercentage01);
     }
 
     /// <summary>

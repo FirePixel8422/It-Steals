@@ -11,25 +11,32 @@ public class StalkerAudio
     [SerializeField] private AudioClip[] randomScreamClips;
     [SerializeField] private MinMaxFloat randomScreamPitch;
     [SerializeField] private MinMaxFloat randomScreamCooldown;
+    private AudioSource randomScreamSource;
+    private float nextScreamGlobalTime;
 
     [Header("Chase:")]
     [SerializeField] private AudioClip chaseClip;
     [SerializeField] private MinMaxFloat randomChasePitch;
     private AudioSource chaseSource;
 
-    private AudioSource randomScreamSource;
-    private float nextScreamGlobalTime;
+    [Header("Spotted:")]
+    [SerializeField] private AudioClip spottedClip;
+    [SerializeField] private MinMaxFloat randomSpottedPitch;
+    private AudioSource spottedSource;
+
 
 
     public void Init(Component stalkerRef)
     {
         randomScreamSource = stalkerRef.AddComponent<AudioSource>();
         randomScreamSource.loop = false;
+        nextScreamGlobalTime = Time.time + EzRandom.Range(randomScreamCooldown);
 
         chaseSource = stalkerRef.AddComponent<AudioSource>();
         chaseSource.loop = true;
 
-        nextScreamGlobalTime = Time.time + EzRandom.Range(randomScreamCooldown);
+        spottedSource = stalkerRef.AddComponent<AudioSource>();
+        spottedSource.loop = false;
     }
 
     public void OnUpdate()
@@ -47,6 +54,12 @@ public class StalkerAudio
         int r = EzRandom.Range(0, randomScreamClips.Length);
         float pitch = EzRandom.Range(randomScreamPitch);
         randomScreamSource.PlayOneShotClipWithPitch(randomScreamClips[r], pitch);
+    }
+
+    public void OnSpotted()
+    {
+        float pitch = EzRandom.Range(randomSpottedPitch);
+        spottedSource.PlayOneShotClipWithPitch(spottedClip, pitch);
     }
 
     public void StartChase()

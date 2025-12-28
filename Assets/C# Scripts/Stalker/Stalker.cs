@@ -41,7 +41,7 @@ public class Stalker : MonoBehaviour
     public void Init()
     {
         audioHandler.Init(this);
-        audioHandler.StartChase();
+        //audioHandler.StartChase();
 
         baseMoveSpeed = cMoveSpeed;
         prevTargetPos = target.position;
@@ -138,6 +138,7 @@ public class Stalker : MonoBehaviour
         if (behaviourState != StalkerState.Ravaging)
         {
             behaviourState = StalkerState.RoamingStart;
+            audioHandler.OnSpotted();
         }
     }
 
